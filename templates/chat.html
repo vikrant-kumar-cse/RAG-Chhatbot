@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medical Chatbot - Voice Enabled</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .chat {
+            margin-top: 5%;
+            margin-bottom: 5%;
+        }
+        
+        .card {
+            height: 600px;
+            border-radius: 15px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.3);
+        }
+        
+        .msg_card_body {
+            overflow-y: auto;
+            max-height: 450px;
+        }
+        
+        .card-header {
+            border-radius: 15px 15px 0 0 !important;
+            border-bottom: 0 !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-footer {
+            border-radius: 0 0 15px 15px !important;
+            border-top: 0 !important;
+        }
+        
+        .type_msg {
+            border: 0 !important;
+            border-radius: 25px !important;
+            overflow: hidden;
+            height: 50px !important;
+        }
+        
+        .send_btn {
+            border-radius: 0 25px 25px 0 !important;
+            background-color: #667eea !important;
+            border: 0 !important;
+            cursor: pointer;
+        }
+        
+        .msg_cotainer {
+            margin-top: auto;
+            margin-bottom: auto;
+            margin-left: 10px;
+            border-radius: 15px;
+            background-color: #82ccdd;
+            padding: 10px;
+            position: relative;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        
+        .msg_cotainer_send {
+            margin-top: auto;
+            margin-bottom: auto;
+            margin-right: 10px;
+            border-radius: 15px;
+            background-color: #78e08f;
+            padding: 10px;
+            position: relative;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        
+        .msg_time {
+            position: absolute;
+            left: 0;
+            bottom: -20px;
+            color: rgba(255,255,255,0.5);
+            font-size: 10px;
+        }
+        
+        .msg_time_send {
+            position: absolute;
+            right: 0;
+            bottom: -20px;
+            color: rgba(255,255,255,0.5);
+            font-size: 10px;
+        }
+        
+        .img_cont_msg {
+            height: 40px;
+            width: 40px;
+        }
+        
+        .user_img_msg {
+            height: 40px;
+            width: 40px;
+            border: 1.5px solid #f5f6fa;
+        }
+        
+        .user_img {
+            height: 70px;
+            width: 70px;
+            border: 1.5px solid #f5f6fa;
+        }
+        
+        .img_cont {
+            position: relative;
+            height: 70px;
+            width: 70px;
+        }
+        
+        .online_icon {
+            position: absolute;
+            height: 15px;
+            width: 15px;
+            background-color: #4cd137;
+            border-radius: 50%;
+            bottom: 0.2em;
+            right: 0.4em;
+            border: 1.5px solid white;
+        }
+        
+        .user_info {
+            margin-top: auto;
+            margin-bottom: auto;
+            margin-left: 15px;
+        }
+        
+        .user_info span {
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .user_info p {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 0;
+        }
+        
+        .voice-button {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 5px;
+        }
+        
+        .voice-button:hover {
+            background-color: #ff5252;
+            transform: scale(1.1);
+        }
+        
+        .voice-button.recording {
+            background-color: #ff4444;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+        }
+        
+        .audio-controls {
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .audio-controls.show {
+            display: block;
+        }
+        
+        .audio-player {
+            width: 100%;
+            margin-top: 5px;
+            max-width: 300px;
+        }
+        
+        .loading-spinner {
+            display: none;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .loading-spinner.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid h-100">
+        <div class="row justify-content-center h-100">
+            <div class="col-md-8 col-xl-6 chat">
+                <div class="card">
+                    <div class="card-header msg_head">
+                        <div class="d-flex bd-highlight">
+                            <div class="img_cont">
+                                <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img">
+                                <span class="online_icon"></span>
+                            </div>
+                            <div class="user_info">
+                                <span>Medical Chatbot</span>
+                                <p>Ask me anything - Text or Voice!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="messageFormeight" class="card-body msg_card_body">
+                        
+                    </div>
+                    <div class="card-footer">
+                        <div class="loading-spinner" id="loadingSpinner">
+                            <div class="spinner-border spinner-border-sm text-info" role="status">
+                                <span class="sr-only">Processing...</span>
+                            </div>
+                            <small class="text-muted ml-2">Processing audio...</small>
+                        </div>
+                        <form id="messageArea" class="input-group">
+                            <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg"/>
+                            <div class="input-group-append">
+                                <button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></button>
+                                <button type="button" id="voiceBtn" class="voice-button" title="Click to record voice message">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                            </div>
+                        </form>
+                        <div id="audioControls" class="audio-controls">
+                            <audio id="audioPlayback" class="audio-player" controls></audio>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        
+        // Initialize Web Audio API
+        async function initAudioRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    sendAudioToServer(audioBlob);
+                    audioChunks = [];
+                };
+                
+                return true;
+            } catch (error) {
+                alert('Microphone access denied. Please enable microphone permissions.');
+                console.error('Microphone error:', error);
+                return false;
+            }
+        }
+        
+        // Handle voice button click
+        $("#voiceBtn").on("click", async function(event) {
+            event.preventDefault();
+            
+            if (!mediaRecorder) {
+                const initialized = await initAudioRecording();
+                if (!initialized) return;
+            }
+            
+            if (!isRecording) {
+                // Start recording
+                audioChunks = [];
+                mediaRecorder.start();
+                isRecording = true;
+                $("#voiceBtn").addClass("recording");
+                $("#voiceBtn").html('<i class="fas fa-stop"></i>');
+                $("#voiceBtn").attr("title", "Click to stop recording");
+            } else {
+                // Stop recording
+                mediaRecorder.stop();
+                isRecording = false;
+                $("#voiceBtn").removeClass("recording");
+                $("#voiceBtn").html('<i class="fas fa-microphone"></i>');
+                $("#voiceBtn").attr("title", "Click to record voice message");
+                $("#loadingSpinner").addClass("show");
+            }
+        });
+        
+        // Convert blob to base64 and send to server
+        function sendAudioToServer(audioBlob) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Audio = e.target.result.split(',')[1];
+                
+                const date = new Date();
+                const hour = date.getHours();
+                const minute = date.getMinutes();
+                const str_time = hour + ":" + minute;
+                
+                // Show listening indicator
+                var loadingHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">🎤 Listening...<span class="msg_time_send">' + str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
+                $("#messageFormeight").append($.parseHTML(loadingHtml));
+                scrollToBottom();
+
+                // Transcribe audio
+                $.ajax({
+                    type: "POST",
+                    url: "/speech-to-text",
+                    data: JSON.stringify({ audio: base64Audio }),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function(transResp) {
+                        // Remove listening indicator
+                        $("#messageFormeight").find(".msg_cotainer_send:contains('Listening')").parent().remove();
+                        $("#loadingSpinner").removeClass("show");
+
+                        var transcribed = transResp.text || '';
+                        if (transcribed) {
+                            // Show transcribed user message
+                            var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + $('<div>').text(transcribed).html() + '<span class="msg_time_send">' + str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
+                            $("#messageFormeight").append($.parseHTML(userHtml));
+                            scrollToBottom();
+
+                            // Automatically send to chatbot
+                            sendMessageToChatbot(transcribed, str_time);
+                        }
+                    },
+                    error: function(xhr) {
+                        $("#loadingSpinner").removeClass("show");
+                        $("#messageFormeight").find(".msg_cotainer_send:contains('Listening')").parent().remove();
+                        const errorMsg = xhr.responseJSON?.error || "Failed to transcribe audio";
+                        var errorHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer alert alert-danger">' + errorMsg + '</div></div>';
+                        $("#messageFormeight").append($.parseHTML(errorHtml));
+                        scrollToBottom();
+                    }
+                });
+            };
+            reader.readAsDataURL(audioBlob);
+        }
+        
+        // Function to send message to chatbot (used by both text and voice)
+        function sendMessageToChatbot(messageText, timeStr) {
+            if (!messageText.trim()) {
+                return;
+            }
+
+            // Send query to RAG backend
+            $.ajax({
+                data: {
+                    msg: messageText,
+                },
+                type: "POST",
+                url: "/get",
+            }).done(function(data) {
+                console.log('RAG Response received:', data);
+                
+                if (!data || (typeof data === 'string' && data.trim() === '')) {
+                    console.error('Empty response from RAG');
+                    var errorHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer alert alert-warning">No response received</div></div>';
+                    $("#messageFormeight").append(errorHtml);
+                    scrollToBottom();
+                    return;
+                }
+                
+                // Display bot text response
+                var botMessage = $('<div>').text(data).html();
+                var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer" style="word-wrap: break-word; white-space: pre-wrap;"><strong>Bot:</strong> ' + botMessage + '<span class="msg_time">' + timeStr + '</span></div></div>';
+                $("#messageFormeight").append(botHtml);
+                console.log('Bot message added to chat');
+                scrollToBottom();
+
+                // Request TTS and play audio
+                $.ajax({
+                    url: '/text-to-speech',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ text: data }),
+                    dataType: 'json',
+                    success: function(ttsResp) {
+                        if (ttsResp && ttsResp.audio) {
+                            const audioData = 'data:audio/wav;base64,' + ttsResp.audio;
+                            $("#audioPlayback").attr('src', audioData);
+                            $("#audioControls").addClass("show");
+                            console.log('Audio TTS successful, playing...');
+                            document.getElementById("audioPlayback").play().catch(function(err) { 
+                                console.warn('Playback failed:', err); 
+                            });
+                        } else if (ttsResp && ttsResp.error) {
+                            console.warn('TTS error:', ttsResp.error);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.warn('TTS request failed:', error);
+                    }
+                });
+            }).fail(function(xhr, status, error) {
+                console.error('AJAX error:', status, error);
+                console.error('Response:', xhr.responseText);
+                var errorHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer alert alert-danger">Error: ' + error + '</div></div>';
+                $("#messageFormeight").append(errorHtml);
+                scrollToBottom();
+            });
+        }
+        
+        // Handle text form submission
+        $("#messageArea").on("submit", function(event) {
+            event.preventDefault();
+            
+            const date = new Date();
+            const hour = date.getHours();
+            const minute = date.getMinutes();
+            const str_time = hour + ":" + minute;
+            var rawText = $("#text").val();
+            
+            if (!rawText.trim()) {
+                return;
+            }
+
+            // Display user message
+            var escapedText = $('<div>').text(rawText).html();
+            var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + escapedText + '<span class="msg_time_send">' + str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
+            $("#messageFormeight").append(userHtml);
+            console.log('User message added to chat:', rawText);
+            scrollToBottom();
+            
+            // Clear input
+            $("#text").val("");
+
+            // Send to chatbot
+            sendMessageToChatbot(rawText, str_time);
+        });
+        
+        // Helper function to scroll to bottom
+        function scrollToBottom() {
+            var msgContainer = document.getElementById("messageFormeight");
+            if (msgContainer) {
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
