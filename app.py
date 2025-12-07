@@ -7,6 +7,7 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from src.voice_handler import voice_handler
+from src.cache_manager import cache_manager  # NEW IMPORT
 from dotenv import load_dotenv
 from src.prompt import *
 from twilio.twiml.messaging_response import MessagingResponse
@@ -151,14 +152,121 @@ def get_chat_history_from_node(session_id=None, limit=100, token=None):
         return []
 
 
-def get_ai_response(user_message):
-    """Get AI response from RAG chain"""
+def get_smart_response(user_message):
+    """
+    CACHE-FIRST AI RESPONSE PIPELINE WITH OFFLINE SUPPORT
+    Priority Order:
+    1. Cache Check (Works Offline ✅)
+    2. Check Internet Connection
+    3. RAG + OpenAI (Online Only)
+    4. RAG Context Summary (Offline Fallback)
+    5. Offline Message
+    """
+    print("\n" + "="*60)
+    print("🧠 SMART RESPONSE PIPELINE")
+    print("="*60)
+    
+    # STEP 1: Check Cache First (WORKS OFFLINE)
+    print("1️⃣ Checking cache...")
+    cache_result = cache_manager.find_match(user_message, threshold=85)
+    
+    if cache_result['matched']:
+        print("✅ CACHE HIT - Returning verified answer (OFFLINE CAPABLE)")
+        print("="*60 + "\n")
+        return {
+            'answer': cache_result['answer'],
+            'source': 'cache',
+            'confidence': cache_result['confidence'],
+            'online': False  # Works offline
+        }
+    
+    # STEP 2: Check Internet Connection
+    print("2️⃣ Cache miss - Checking internet connection...")
+    is_online = cache_manager.check_internet_connection(timeout=2)
+    print(f"   Internet: {'🟢 Online' if is_online else '🔴 Offline'}")
+    
+    # STEP 3: Try RAG + OpenAI (If Online)
+    if is_online:
+        print("3️⃣ Attempting RAG + OpenAI...")
+        try:
+            response = rag_chain.invoke({"input": user_message})
+            answer = str(response["answer"])
+            
+            # Add disclaimer if not already present
+            if "consult a certified doctor" not in answer.lower():
+                answer += "\n\n**Note:** This is general information. Consult a certified doctor for personalized medical advice."
+            
+            print("✅ OpenAI response generated")
+            print("="*60 + "\n")
+            return {
+                'answer': answer,
+                'source': 'rag-online',
+                'confidence': 0.75,
+                'online': True
+            }
+            
+        except Exception as e:
+            print(f"⚠️  OpenAI Error: {str(e)}")
+            print("   Falling back to offline mode...")
+    
+    # STEP 4: Offline Mode - Use RAG Context Only (No OpenAI API)
+    print("4️⃣ OFFLINE MODE - Using RAG context without OpenAI...")
     try:
-        response = rag_chain.invoke({"input": user_message})
-        return str(response["answer"])
+        # Get relevant documents from Pinecone (this works offline if Pinecone is cached)
+        docs = retriever.get_relevant_documents(user_message)
+        
+        if docs and len(docs) > 0:
+            # Summarize context from retrieved documents
+            context_summary = "\n\n".join([doc.page_content[:300] for doc in docs[:2]])
+            
+            answer = f"Based on available medical information:\n\n{context_summary}\n\n"
+            answer += "**Note:** This is limited information due to offline mode. "
+            answer += "For complete answers and personalized advice, please try again when internet is available "
+            answer += "or consult a certified doctor immediately for urgent concerns."
+            
+            print(f"✅ Offline RAG summary generated ({len(docs)} docs)")
+            print("="*60 + "\n")
+            return {
+                'answer': answer,
+                'source': 'rag-offline',
+                'confidence': 0.5,
+                'online': False
+            }
+            
     except Exception as e:
-        print(f"Error in AI response: {str(e)}")
-        return "I apologize, but I'm having trouble generating a response right now. Please try again."
+        print(f"⚠️  RAG Context Error: {str(e)}")
+    
+    # STEP 5: Final Offline Fallback
+    print("5️⃣ Complete offline fallback")
+    print("="*60 + "\n")
+    
+    offline_message = (
+        "⚠️ **Offline Mode - Limited Information Available**\n\n"
+        "I apologize, but I cannot provide a detailed answer right now because:\n"
+        "- Your question is not in the cached database\n"
+        "- Internet connection is unavailable or unstable\n"
+        "- AI services cannot be reached\n\n"
+        "**What you can do:**\n"
+        "1. Try again when internet connection is restored\n"
+        "2. Rephrase your question - it might match cached answers\n"
+        "3. For urgent medical concerns, please contact a certified doctor immediately\n\n"
+        "**Emergency Numbers:**\n"
+        "- India: 102 (Ambulance), 104 (Medical Helpline)\n"
+        "- International: Your local emergency services"
+    )
+    
+    return {
+        'answer': offline_message,
+        'source': 'offline-fallback',
+        'confidence': 0.0,
+        'online': False
+    }
+
+
+def get_ai_response(user_message):
+    """Legacy function - now calls get_smart_response"""
+    result = get_smart_response(user_message)
+    return result['answer']
 
 
 @app.route("/")
@@ -177,7 +285,7 @@ def whatsapp_webhook():
         # Get incoming message details
         incoming_msg = request.values.get('Body', '').strip()
         from_number = request.values.get('From', '')
-        media_url = request.values.get('MediaUrl0', '')  # Voice/audio URL
+        media_url = request.values.get('MediaUrl0', '')
         media_type = request.values.get('MediaContentType0', '')
         num_media = request.values.get('NumMedia', '0')
         
@@ -229,7 +337,7 @@ def whatsapp_webhook():
                     user_id=user_phone
                 )
                 
-                # Get AI response
+                # Get AI response using SMART PIPELINE
                 print(f"🤖 Generating AI response...")
                 answer = get_ai_response(user_text)
                 print(f"✅ AI Response: {answer[:100]}...")
@@ -275,7 +383,7 @@ def whatsapp_webhook():
                 user_id=user_phone
             )
             
-            # Get AI response
+            # Get AI response using SMART PIPELINE
             print(f"🤖 Generating AI response...")
             answer = get_ai_response(incoming_msg)
             print(f"✅ AI Response: {answer[:100]}...")
@@ -394,7 +502,9 @@ def chat():
         token=token
     )
     
-    answer = get_ai_response(msg)
+    # Use SMART RESPONSE PIPELINE
+    result = get_smart_response(msg)
+    answer = result['answer']
     
     save_message_to_node(
         sender="bot",
@@ -406,7 +516,10 @@ def chat():
     
     return jsonify({
         "answer": answer,
-        "session_id": session.get('chat_session_id')
+        "session_id": session.get('chat_session_id'),
+        "source": result.get('source', 'unknown'),
+        "confidence": result.get('confidence', 0),
+        "online": result.get('online', True)
     })
 
 
@@ -444,6 +557,7 @@ def voice_chat():
             token=token
         )
         
+        # Use SMART RESPONSE PIPELINE
         answer_text = get_ai_response(user_text)
         answer_audio = voice_handler.text_to_speech(answer_text)
         
@@ -529,6 +643,26 @@ def text_to_speech_endpoint():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/cache/stats", methods=["GET"])
+def cache_stats():
+    """Get cache statistics and system status - NEW ENDPOINT"""
+    try:
+        stats = cache_manager.get_cache_stats()
+        is_online = cache_manager.check_internet_connection()
+        
+        return jsonify({
+            "success": True,
+            "stats": stats,
+            "system": {
+                "internet": is_online,
+                "cache_enabled": len(cache_manager.cache_data) > 0,
+                "offline_mode_ready": True
+            }
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.errorhandler(500)
 def internal_error(e):
     return jsonify({
@@ -546,6 +680,15 @@ if __name__ == '__main__':
     print(f"✅ Web Chat: /get endpoint")
     print(f"✅ Voice Chat: /voice-chat endpoint")
     print(f"✅ WhatsApp Bot: /whatsapp endpoint (Text + Voice)")
+    
+    # Display cache stats
+    try:
+        stats = cache_manager.get_cache_stats()
+        print(f"✅ Cache System: Loaded")
+        print(f"   📦 Total Questions: {stats['total_questions']}")
+        print(f"   📂 Categories: {', '.join(stats['categories'].keys())}")
+    except Exception as e:
+        print(f"⚠️  Cache System: Error - {str(e)}")
     
     if twilio_client:
         print(f"✅ Twilio: Configured")

@@ -1,0 +1,72 @@
+[
+    {
+      "id": 1,
+      "question": "What are the symptoms of diabetes?",
+      "answer": "Common symptoms of diabetes include increased thirst, frequent urination, extreme hunger, unexplained weight loss, fatigue, blurred vision, slow-healing sores, and frequent infections. Type 1 diabetes symptoms often appear suddenly, while Type 2 symptoms develop gradually.\n\n**Note:** This is general information. Consult a certified doctor for proper diagnosis and treatment.",
+      "keywords": ["diabetes", "symptoms", "blood sugar", "thirst", "urination"],
+      "category": "endocrinology"
+    },
+    {
+      "id": 2,
+      "question": "What is normal blood pressure?",
+      "answer": "Normal blood pressure is typically around 120/80 mmHg. Readings below 120/80 are considered optimal. Elevated blood pressure ranges from 120-129 systolic and less than 80 diastolic. Hypertension Stage 1 is 130-139 systolic or 80-89 diastolic.\n\n**Note:** This is general information. Consult a certified doctor for personalized health advice.",
+      "keywords": ["blood pressure", "normal", "hypertension", "120/80"],
+      "category": "cardiology"
+    },
+    {
+      "id": 3,
+      "question": "How to reduce fever naturally?",
+      "answer": "Natural ways to reduce fever include: staying hydrated with water and fluids, getting adequate rest, taking a lukewarm bath, using cool compresses on forehead, wearing light clothing, and maintaining a comfortable room temperature. Avoid aspirin for children.\n\n**Note:** This is general information. If fever persists above 103°F (39.4°C) or lasts more than 3 days, consult a certified doctor immediately.",
+      "keywords": ["fever", "reduce", "natural", "home remedies", "temperature"],
+      "category": "general"
+    },
+    {
+      "id": 4,
+      "question": "What causes headaches?",
+      "answer": "Common causes of headaches include tension and stress, dehydration, lack of sleep, eye strain, sinus infections, caffeine withdrawal, hunger, poor posture, and certain foods. Migraines can be triggered by hormonal changes, bright lights, or strong odors.\n\n**Note:** This is general information. If headaches are severe, frequent, or accompanied by other symptoms, consult a certified doctor for proper evaluation.",
+      "keywords": ["headache", "causes", "migraine", "tension", "pain"],
+      "category": "neurology"
+    },
+    {
+      "id": 5,
+      "question": "How much water should I drink daily?",
+      "answer": "The general recommendation is to drink 8 glasses (about 2 liters or half a gallon) of water per day, known as the 8x8 rule. However, individual needs vary based on age, gender, activity level, climate, and overall health. Men typically need about 3.7 liters and women about 2.7 liters of total fluids daily, including food sources.\n\n**Note:** This is general information. Consult a certified doctor for personalized hydration recommendations, especially if you have kidney or heart conditions.",
+      "keywords": ["water", "hydration", "daily intake", "drink", "liters"],
+      "category": "nutrition"
+    },
+    {
+      "id": 6,
+      "question": "What is COVID-19?",
+      "answer": "COVID-19 is an infectious disease caused by the SARS-CoV-2 virus. Common symptoms include fever, cough, fatigue, loss of taste or smell, and difficulty breathing. It spreads through respiratory droplets when an infected person coughs, sneezes, or talks. Prevention includes vaccination, wearing masks, hand hygiene, and social distancing.\n\n**Note:** This is general information. For testing, treatment, or specific concerns, consult a certified doctor or healthcare provider.",
+      "keywords": ["covid", "coronavirus", "symptoms", "pandemic", "sars-cov-2"],
+      "category": "infectious disease"
+    },
+    {
+      "id": 7,
+      "question": "How to improve sleep quality?",
+      "answer": "To improve sleep quality: maintain a consistent sleep schedule, create a relaxing bedtime routine, keep your bedroom cool and dark, avoid screens 1 hour before bed, limit caffeine and alcohol, exercise regularly (but not before bed), avoid large meals late at night, and manage stress through meditation or relaxation techniques.\n\n**Note:** This is general information. If you have persistent sleep problems, consult a certified doctor to rule out sleep disorders.",
+      "keywords": ["sleep", "insomnia", "quality", "rest", "bedtime"],
+      "category": "general"
+    },
+    {
+      "id": 8,
+      "question": "What are the signs of heart attack?",
+      "answer": "Warning signs of a heart attack include chest pain or discomfort (pressure, squeezing, fullness), pain in arms, back, neck, jaw or stomach, shortness of breath, cold sweat, nausea, and lightheadedness. Women may experience atypical symptoms like fatigue, indigestion, or back pain.\n\n**EMERGENCY:** If you suspect a heart attack, call emergency services (911 or local emergency number) immediately. This is general information - consult a certified doctor for heart health concerns.",
+      "keywords": ["heart attack", "chest pain", "emergency", "symptoms", "cardiac"],
+      "category": "cardiology"
+    },
+    {
+      "id": 9,
+      "question": "What is a healthy BMI?",
+      "answer": "Body Mass Index (BMI) categories are: Underweight (below 18.5), Normal weight (18.5-24.9), Overweight (25-29.9), and Obese (30 or above). BMI is calculated by dividing weight in kilograms by height in meters squared. However, BMI doesn't account for muscle mass, bone density, or body composition.\n\n**Note:** This is general information. Consult a certified doctor or nutritionist for personalized health assessment and weight management advice.",
+      "keywords": ["bmi", "body mass index", "weight", "healthy", "obesity"],
+      "category": "nutrition"
+    },
+    {
+      "id": 10,
+      "question": "How to prevent common cold?",
+      "answer": "To prevent common cold: wash hands frequently with soap and water, avoid touching your face, maintain distance from sick people, disinfect frequently-touched surfaces, get adequate sleep, manage stress, eat a balanced diet rich in vitamins, stay hydrated, and consider vitamin C and zinc supplements.\n\n**Note:** This is general information. If cold symptoms persist or worsen, consult a certified doctor to rule out other conditions.",
+      "keywords": ["cold", "prevention", "immune", "virus", "flu"],
+      "category": "general"
+    }
+  ]
